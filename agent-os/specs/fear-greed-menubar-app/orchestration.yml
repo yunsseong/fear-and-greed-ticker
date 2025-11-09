@@ -1,0 +1,21 @@
+task_groups:
+  - name: Backend Project Initialization
+  - name: Frontend Project Initialization
+  - name: CNN Fear & Greed Index Scraper
+  - name: API Endpoints & Caching
+  - name: Error Handling & Logging
+  - name: Menubar Tray Icon & Display
+  - name: Dropdown Window UI
+  - name: Semi-Circular Gauge Visualization
+  - name: Current & Historical Data Display
+  - name: Settings & Footer UI
+  - name: API Client & Data Fetching
+  - name: IPC Communication Setup
+  - name: Automatic & Manual Data Refresh
+  - name: Local Caching & Offline Mode
+  - name: Error States & User Feedback
+  - name: Resource Optimization
+  - name: Production Build Configuration
+  - name: App Notarization & Distribution
+  - name: Test Review & Gap Analysis
+  - name: Manual Testing & User Acceptance

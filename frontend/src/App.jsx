@@ -5,7 +5,7 @@ import { Button } from './components/ui/button'
 import { Card, CardContent } from './components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from './components/ui/tabs'
 import { RefreshCw, X, Settings as SettingsIcon } from 'lucide-react'
-import { getTranslation, translateStatus } from './i18n/translations'
+import { getTranslation } from './i18n/translations'
 
 function App() {
   const [data, setData] = useState(null)
