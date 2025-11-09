@@ -7,7 +7,6 @@ const { app, Tray, BrowserWindow, Menu, ipcMain, shell, nativeImage, dialog } = 
 const path = require('path');
 const Store = require('electron-store');
 const { fetchWithRetry } = require('./api-client');
-const { createCanvas } = require('canvas');
 const { autoUpdater } = require('electron-updater');
 
 // Initialize electron-store for settings persistence
@@ -76,7 +75,7 @@ app.on('before-quit', () => {
  * Create system tray icon
  */
 function createTray() {
-  // In development, use source path; in production, use app path
+  // Try to load icon file, fallback to empty image
   let iconPath;
   if (process.env.VITE_DEV_SERVER_URL) {
     iconPath = path.join(process.cwd(), 'assets/icons/trayTemplate.png');
@@ -84,17 +83,17 @@ function createTray() {
     iconPath = path.join(__dirname, '../../assets/icons/trayTemplate.png');
   }
 
-  // For now, create a simple icon using canvas if file doesn't exist
   try {
     tray = new Tray(iconPath);
   } catch (error) {
-    console.log('Creating tray icon from canvas...');
-    const icon = createTrayIcon(50, 'Neutral');
-    tray = new Tray(icon);
+    console.log('Icon file not found, using text-only tray');
+    // Create empty 1x1 transparent image for text-only display
+    const emptyImage = nativeImage.createEmpty();
+    tray = new Tray(emptyImage);
   }
 
   tray.setToolTip('Fear & Greed Index');
-  tray.setTitle('Loading...');
+  tray.setTitle('--');
 
   tray.on('click', () => {
     toggleWindow();
@@ -429,48 +428,6 @@ function setupIPC() {
   ipcMain.handle('install-update', () => {
     autoUpdater.quitAndInstall();
   });
-}
-
-/**
- * Create circular tray icon with value
- * @param {number} value - Index value (0-100)
- * @param {string} status - Status label
- * @returns {NativeImage} - Tray icon image
- */
-function createTrayIcon(value, status) {
-  const size = 22; // macOS menubar icon size
-  const canvas = createCanvas(size, size);
-  const ctx = canvas.getContext('2d');
-
-  // Determine color based on value
-  let color;
-  if (value <= 25) color = '#DC2626'; // Extreme Fear - Red
-  else if (value <= 45) color = '#F97316'; // Fear - Orange
-  else if (value <= 55) color = '#6B7280'; // Neutral - Gray
-  else if (value <= 75) color = '#10B981'; // Greed - Green
-  else color = '#059669'; // Extreme Greed - Dark Green
-
-  // Draw circle
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Draw white border for better visibility
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Draw text
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 12px -apple-system';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(value.toString(), size / 2, size / 2);
-
-  // Convert canvas to NativeImage
-  const buffer = canvas.toBuffer('image/png');
-  return nativeImage.createFromBuffer(buffer);
 }
 
 /**
