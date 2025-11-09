@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fear-greed-backend-prod
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=WARNING
+      - CACHE_TTL_MINUTES=30
+      - MAX_RETRIES=3
+    volumes:
+      # Only mount logs in production (no source code mounting)
+      - ./logs:/app/logs
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health', timeout=5.0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    networks:
+      - fear-greed-network
+
+networks:
+  fear-greed-network:
+    driver: bridge
