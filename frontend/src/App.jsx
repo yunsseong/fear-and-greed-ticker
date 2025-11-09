@@ -67,20 +67,21 @@ function App() {
     }
   }, [])
 
-  // Adjust window height when content changes
+  // Adjust window height when content changes using ResizeObserver
   useEffect(() => {
-    const adjustWindowHeight = () => {
-      if (containerRef.current && window.api) {
-        const height = containerRef.current.scrollHeight
-        window.api.setWindowHeight(height)
+    if (!containerRef.current || !window.api) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const height = entry.contentRect.height;
+        window.api.setWindowHeight(height);
       }
-    }
+    });
 
-    // Adjust height after a short delay to ensure content is rendered
-    const timeoutId = setTimeout(adjustWindowHeight, 100)
+    resizeObserver.observe(containerRef.current);
 
-    return () => clearTimeout(timeoutId)
-  }, [currentPage, data])
+    return () => resizeObserver.disconnect();
+  }, [currentPage])
 
   const fetchData = async () => {
     if (isLoading || !window.api) return
@@ -182,7 +183,6 @@ function App() {
               <Gauge
                 value={data.current.value}
                 status={data.current.status}
-                animate={true}
               />
             ) : (
               <div className="w-full text-center py-8 text-sm text-muted-foreground">

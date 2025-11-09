@@ -128,7 +128,7 @@ export function Settings({
         <Card className="border-0">
           <CardContent className="p-3">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Updates</Label>
+              <Label className="text-sm font-medium">{t('updates')}</Label>
               {updateStatus === 'idle' && (
                 <Button
                   onClick={handleCheckForUpdates}

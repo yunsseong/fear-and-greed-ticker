@@ -13,6 +13,17 @@ const { autoUpdater } = require('electron-updater');
 // Initialize electron-store for settings persistence
 const store = new Store();
 
+// Configuration constants
+const CONFIG = {
+  WINDOW_WIDTH: 320,
+  WINDOW_INITIAL_HEIGHT: 383,
+  AUTO_REFRESH_INTERVAL: 60 * 60 * 1000, // 1 hour
+  UPDATE_CHECK_INTERVAL: 6 * 60 * 60 * 1000, // 6 hours
+  UPDATE_CHECK_DELAY: 3000, // 3 seconds after startup
+  WINDOW_HEIGHT_ANIMATION_DURATION: 200, // milliseconds
+  WINDOW_HEIGHT_ANIMATION_FPS: 60,
+};
+
 // Keep references to prevent garbage collection
 let tray = null;
 let mainWindow = null;
@@ -103,8 +114,8 @@ function createWindow() {
   }
 
   mainWindow = new BrowserWindow({
-    width: 320,
-    height: 383,
+    width: CONFIG.WINDOW_WIDTH,
+    height: CONFIG.WINDOW_INITIAL_HEIGHT,
     show: false,
     frame: false,
     resizable: false,
@@ -177,17 +188,17 @@ function showWindow() {
 function animateWindowHeight(startHeight, endHeight) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
 
-  const duration = 200; // Animation duration in ms
   const startTime = Date.now();
   const heightDiff = endHeight - startHeight;
+  const frameDuration = 1000 / CONFIG.WINDOW_HEIGHT_ANIMATION_FPS;
 
   const animate = () => {
     if (!mainWindow || mainWindow.isDestroyed()) return;
 
     const elapsed = Date.now() - startTime;
-    const progress = Math.min(elapsed / duration, 1);
+    const progress = Math.min(elapsed / CONFIG.WINDOW_HEIGHT_ANIMATION_DURATION, 1);
 
-    // Easing function (ease-out)
+    // Easing function (ease-out cubic)
     const eased = 1 - Math.pow(1 - progress, 3);
     const currentHeight = Math.round(startHeight + (heightDiff * eased));
 
@@ -198,7 +209,7 @@ function animateWindowHeight(startHeight, endHeight) {
     }, false);
 
     if (progress < 1) {
-      setTimeout(animate, 16); // ~60fps
+      setTimeout(animate, frameDuration);
     }
   };
 
@@ -245,13 +256,10 @@ async function fetchAndUpdateData() {
  * Start automatic refresh interval
  */
 function startAutoRefresh() {
-  // Refresh every 60 minutes
-  const refreshInterval = 60 * 60 * 1000; // 60 minutes in milliseconds
-
   autoRefreshInterval = setInterval(() => {
     console.log('Auto-refreshing data...');
     fetchAndUpdateData();
-  }, refreshInterval);
+  }, CONFIG.AUTO_REFRESH_INTERVAL);
 }
 
 /**
@@ -262,15 +270,15 @@ function setupAutoUpdater() {
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
 
-  // Check for updates on startup (after 3 seconds)
+  // Check for updates on startup
   setTimeout(() => {
     autoUpdater.checkForUpdates();
-  }, 3000);
+  }, CONFIG.UPDATE_CHECK_DELAY);
 
-  // Check for updates every 6 hours
+  // Check for updates periodically
   setInterval(() => {
     autoUpdater.checkForUpdates();
-  }, 6 * 60 * 60 * 1000);
+  }, CONFIG.UPDATE_CHECK_INTERVAL);
 
   // Update available
   autoUpdater.on('update-available', (info) => {
@@ -348,10 +356,17 @@ function setupIPC() {
   });
 
   ipcMain.handle('get-settings', () => {
+    // Validate and sanitize settings
+    const launchAtLogin = Boolean(store.get('launchAtLogin', false));
+    const rawIndexType = store.get('indexType', 'stock');
+    const indexType = ['stock', 'crypto'].includes(rawIndexType) ? rawIndexType : 'stock';
+    const rawLanguage = store.get('language', 'en');
+    const language = ['en', 'ko'].includes(rawLanguage) ? rawLanguage : 'en';
+
     return {
-      launchAtLogin: store.get('launchAtLogin', false),
-      indexType: store.get('indexType', 'stock'),
-      language: store.get('language', 'en'),
+      launchAtLogin,
+      indexType,
+      language,
     };
   });
 
@@ -372,6 +387,21 @@ function setupIPC() {
   });
 
   ipcMain.handle('set-setting', async (event, key, value) => {
+    // Validate setting key and value
+    const validSettings = {
+      language: ['en', 'ko'],
+      indexType: ['stock', 'crypto'],
+      launchAtLogin: [true, false]
+    };
+
+    if (!validSettings[key]) {
+      return { success: false, error: 'Invalid setting key' };
+    }
+
+    if (Array.isArray(validSettings[key]) && !validSettings[key].includes(value)) {
+      return { success: false, error: `Invalid value for ${key}` };
+    }
+
     store.set(key, value);
     return { success: true };
   });

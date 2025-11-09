@@ -40,6 +40,7 @@ export const translations = {
     updateAvailable: 'Update available',
     downloading: 'Downloading...',
     readyToInstall: 'Ready to install',
+    updates: 'Updates',
   },
 
   ko: {
@@ -83,6 +84,7 @@ export const translations = {
     updateAvailable: '업데이트 가능',
     downloading: '다운로드 중...',
     readyToInstall: '설치 준비 완료',
+    updates: '업데이트',
   }
 }
 

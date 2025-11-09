@@ -39,20 +39,35 @@ contextBridge.exposeInMainWorld('api', {
 
   // Listen for data updates
   onDataUpdated: (callback) => {
-    ipcRenderer.on('data-updated', (event, data) => callback(data));
+    const handler = (event, data) => {
+      // Validate data structure
+      if (data && typeof data === 'object' && data.current) {
+        callback(data);
+      } else {
+        console.error('Invalid data-updated payload:', data);
+      }
+    };
+    ipcRenderer.on('data-updated', handler);
+    return () => ipcRenderer.removeListener('data-updated', handler);
   },
 
   // Listen for errors
   onError: (callback) => {
-    ipcRenderer.on('error-occurred', (event, error) => callback(error));
+    const handler = (event, error) => callback(error);
+    ipcRenderer.on('error-occurred', handler);
+    return () => ipcRenderer.removeListener('error-occurred', handler);
   },
 
   // Listen for update events
   onUpdateAvailable: (callback) => {
-    ipcRenderer.on('update-available', (event, info) => callback(info));
+    const handler = (event, info) => callback(info);
+    ipcRenderer.on('update-available', handler);
+    return () => ipcRenderer.removeListener('update-available', handler);
   },
 
   onUpdateDownloadProgress: (callback) => {
-    ipcRenderer.on('update-download-progress', (event, progress) => callback(progress));
+    const handler = (event, progress) => callback(progress);
+    ipcRenderer.on('update-download-progress', handler);
+    return () => ipcRenderer.removeListener('update-download-progress', handler);
   },
 });

@@ -3,8 +3,38 @@
  * Handles communication with FastAPI backend
  */
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
+const BACKEND_URL = process.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 const TIMEOUT = 10000; // 10 seconds
+
+/**
+ * Validate Fear & Greed data structure
+ * @param {Object} data - Data to validate
+ * @returns {Object} Validated data
+ * @throws {Error} If data is invalid
+ */
+function validateFearGreedData(data) {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid response: not an object');
+  }
+
+  if (!data.current || typeof data.current !== 'object') {
+    throw new Error('Invalid response: missing current data');
+  }
+
+  if (typeof data.current.value !== 'number') {
+    throw new Error('Invalid response: current.value must be a number');
+  }
+
+  if (data.current.value < 0 || data.current.value > 100) {
+    throw new Error(`Invalid response: value out of range (${data.current.value})`);
+  }
+
+  if (typeof data.current.status !== 'string') {
+    throw new Error('Invalid response: current.status must be a string');
+  }
+
+  return data;
+}
 
 /**
  * Fetch Fear & Greed Index data from backend
@@ -34,7 +64,7 @@ async function fetchFearGreedData(indexType = 'stock') {
     }
 
     const data = await response.json();
-    return data;
+    return validateFearGreedData(data);
   } catch (error) {
     clearTimeout(timeoutId);
 
