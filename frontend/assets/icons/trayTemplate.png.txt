@@ -1,0 +1,2 @@
+This is a placeholder for the tray icon PNG file.
+In production, create a 16x16 and 32x32 template PNG image.
