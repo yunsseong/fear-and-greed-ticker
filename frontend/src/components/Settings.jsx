@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card, CardContent } from './ui/card'
 import { Checkbox } from './ui/checkbox'
 import { Label } from './ui/label'
-import { RadioGroup, RadioGroupItem } from './ui/radio-group'
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs'
 import { Button } from './ui/button'
 import { ArrowLeft, Download } from 'lucide-react'
 import { getTranslation } from '../i18n/translations'
@@ -83,20 +83,12 @@ export function Settings({
           <CardContent className="p-3">
             <div className="space-y-2">
               <Label className="text-sm font-medium">{t('defaultIndexType')}</Label>
-              <RadioGroup value={indexType} onValueChange={onIndexTypeChange}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="stock" id="stock-setting" />
-                  <Label htmlFor="stock-setting" className="text-sm cursor-pointer">
-                    {t('stockMarket')}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="crypto" id="crypto-setting" />
-                  <Label htmlFor="crypto-setting" className="text-sm cursor-pointer">
-                    {t('cryptocurrency')}
-                  </Label>
-                </div>
-              </RadioGroup>
+              <Tabs value={indexType} onValueChange={onIndexTypeChange} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 h-8">
+                  <TabsTrigger value="stock" className="text-xs">{t('stockMarket')}</TabsTrigger>
+                  <TabsTrigger value="crypto" className="text-xs">{t('cryptocurrency')}</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </CardContent>
         </Card>
@@ -106,20 +98,12 @@ export function Settings({
           <CardContent className="p-3">
             <div className="space-y-2">
               <Label className="text-sm font-medium">{t('language')}</Label>
-              <RadioGroup value={language} onValueChange={onLanguageChange}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="en" id="lang-en" />
-                  <Label htmlFor="lang-en" className="text-sm cursor-pointer">
-                    {t('english')}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="ko" id="lang-ko" />
-                  <Label htmlFor="lang-ko" className="text-sm cursor-pointer">
-                    {t('korean')}
-                  </Label>
-                </div>
-              </RadioGroup>
+              <Tabs value={language} onValueChange={onLanguageChange} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 h-8">
+                  <TabsTrigger value="en" className="text-xs">{t('english')}</TabsTrigger>
+                  <TabsTrigger value="ko" className="text-xs">{t('korean')}</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </CardContent>
         </Card>
