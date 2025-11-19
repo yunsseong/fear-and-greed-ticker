@@ -2,6 +2,10 @@
 
 A lightweight macOS menubar application that provides instant access to the CNN Business Fear & Greed Index.
 
+## ⚠️ Disclaimer
+
+This application is provided for **informational and reference purposes only**. The Fear & Greed Index data is not financial advice and should not be used as the sole basis for investment decisions. **We do not assume any responsibility for financial losses** incurred from investment decisions made using this application. Always conduct your own research and consult with qualified financial advisors before making investment decisions.
+
 ## Project Structure
 
 ```
@@ -68,6 +72,7 @@ fear/
 - **httpx** 0.25.1 - Async HTTP client
 - **Pydantic** 2.5.0 - Data validation
 - **pytest** 7.4.3 - Testing framework
+- **Docker** & **Docker Compose** - Containerized deployment
 
 ### Frontend
 - **Electron** 27.0.0 - Cross-platform desktop apps
@@ -82,6 +87,22 @@ fear/
 ```bash
 cd backend
 
+# Start backend with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Run tests (inside container)
+docker-compose exec backend pytest -v
+
+# Stop backend
+docker-compose down
+# Server runs at http://localhost:8000
+```
+
+**Alternative: Manual Setup (without Docker)**
+```bash
 # Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
@@ -94,7 +115,6 @@ pytest -v
 
 # Start backend server
 python main.py
-# Server runs at http://localhost:8000
 ```
 
 ### Frontend Setup
@@ -119,6 +139,13 @@ npm run build
 
 ### 1. Start Backend Server
 
+**Using Docker Compose (Recommended):**
+```bash
+cd backend
+docker-compose up -d
+```
+
+**Using Manual Setup:**
 ```bash
 cd backend
 source venv/bin/activate
@@ -166,6 +193,20 @@ Get current and historical Fear & Greed Index data
 ## Testing
 
 ### Backend Tests
+
+**Using Docker Compose:**
+```bash
+cd backend
+
+# Run all tests
+docker-compose exec backend pytest -v
+
+# Run specific test file
+docker-compose exec backend pytest tests/test_scraper.py -v
+docker-compose exec backend pytest tests/test_api_endpoints.py -v
+```
+
+**Using Manual Setup:**
 ```bash
 cd backend
 source venv/bin/activate
